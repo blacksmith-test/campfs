@@ -87,11 +87,13 @@ RSpec.configure do |config|
   config.before(:each, type: :system, js: true) do
     driven_by :remote_chrome
     server_host = Socket.ip_address_list.find { |addr| addr.ipv4? && !addr.ipv4_loopback? }&.ip_address
-    server_host ||= begin
-      Addrinfo.foreach(Socket.gethostname, nil, Socket::AF_INET).first&.ip_address
+    resolved_host = nil
+    begin
+      resolved_host = Addrinfo.foreach(Socket.gethostname, nil, Socket::AF_INET).first&.ip_address
     rescue SocketError
-      nil
+      resolved_host = nil
     end
+    server_host ||= resolved_host
     server_host ||= IPSocket.getaddress(Socket.gethostname)
     server_host = server_host.split("%").first
 

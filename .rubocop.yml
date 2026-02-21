@@ -13,12 +13,9 @@ AllCops:
     - Rakefile
     - channels/application_cable/*
 
-MixinUsage:
+Style/MixinUsage:
   Include:
     - app/**/*.rb
-
-Layout/TrailingEmptyLines:
-  EnforcedStyle: final_newline
 
 Rails/CreateTableWithTimestamps:
   Exclude:
