@@ -86,8 +86,18 @@ RSpec.configure do |config|
 
   config.before(:each, type: :system, js: true) do
     driven_by :remote_chrome
-    Capybara.server_host = IPSocket.getaddress(Socket.gethostname)
+    server_host = Socket.ip_address_list.find { |addr| addr.ipv4? && !addr.ipv4_loopback? }&.ip_address
+    server_host ||= begin
+      Addrinfo.foreach(Socket.gethostname, nil, Socket::AF_INET).first&.ip_address
+    rescue SocketError
+      nil
+    end
+    server_host ||= IPSocket.getaddress(Socket.gethostname)
+    server_host = server_host.split("%").first
+
+    Capybara.server_host = server_host
     Capybara.server_port = 3001
-    Capybara.app_host = "http://#{Capybara.server_host}:#{Capybara.server_port}"
+    app_host = server_host.include?(":") ? "[#{server_host}]" : server_host
+    Capybara.app_host = "http://#{app_host}:#{Capybara.server_port}"
   end
 end
